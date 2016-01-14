@@ -1,0 +1,4 @@
+.DS_Store
+*.devhelper
+library/bdAttachmentPreview/DevHelper/Generated
+library/bdAttachmentPreview/DevHelper/XFCP
