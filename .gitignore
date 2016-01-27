@@ -2,3 +2,5 @@
 *.devhelper
 library/bdAttachmentPreview/DevHelper/Generated
 library/bdAttachmentPreview/DevHelper/XFCP
+FileSums.php
+js/bdAttachmentPreview/*.js

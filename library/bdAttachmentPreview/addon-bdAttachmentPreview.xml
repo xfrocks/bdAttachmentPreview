@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="dev" version_id="1" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates>
+    <template title="bdattachmentpreview_option_template_pdf"><![CDATA[<xen:controlunit label="{$preparedOption.title}" hint="{$preparedOption.hint}">
+	<xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
+	<xen:html>
+
+		<xen:checkbox>
+			<xen:option name="{$fieldPrefix}[{$preparedOption.option_id}][ghostscript]"
+						value="{$ghostscript}"
+						selected="{$ghostscript} && {$preparedOption.option_value.ghostscript} == {$ghostscript}"
+						unselectable="{xen:if '{$ghostscript}', 0, 1}">
+				<xen:label>
+					{xen:phrase bdattachmentpreview_pdf_ghostscript}
+					<div class="explain">{xen:if '{$ghostscript}',
+						{xen:phrase bdattachmentpreview_pdf_ghostscript_explain,
+							'path={$ghostscript}'},
+						'{xen:phrase bdattachmentpreview_pdf_ghostscript_instruction}
+						{xen:if '{$instructions.ghostscript}', {xen:phrase bdattachmentpreview_try_exec_x,
+							'cmd={$instructions.ghostscript}'}}'}</div>
+				</xen:label>
+			</xen:option>
+		</xen:checkbox>
+
+		<xen:checkbox>
+			<xen:option name="{$fieldPrefix}[{$preparedOption.option_id}][pdfinfo]"
+						value="{$pdfinfo}"
+						selected="{$pdfinfo} && {$preparedOption.option_value.pdfinfo} == {$pdfinfo}"
+						unselectable="{xen:if '{$ghostscript}', 0, 1}"
+						inputclass="Hider">
+				<xen:label>
+					{xen:phrase bdattachmentpreview_pdf_pdfinfo}
+					<div class="explain">{xen:if '{$pdfinfo}',
+						{xen:phrase bdattachmentpreview_pdf_pdfinfo_explain,
+							'path={$pdfinfo}'},
+						'{xen:phrase bdattachmentpreview_pdf_pdfinfo_instruction}
+						{xen:if '{$instructions.pdfinfo}', {xen:phrase bdattachmentpreview_try_exec_x,
+							'cmd={$instructions.pdfinfo}'}}'}</div>
+				</xen:label>
+				
+				<xen:disabled>
+					<div>
+						{xen:phrase bdattachmentpreview_pdf_pages_max}:
+						<xen:spinbox name="{$fieldPrefix}[{$preparedOption.option_id}][pages_max]"
+									 value="{xen:if 'isset({$preparedOption.option_value.pages_max})',
+											{$preparedOption.option_value.pages_max}, 5}"/>
+					</div>
+				</xen:disabled>
+			</xen:option>
+		</xen:checkbox>
+		
+		<input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
+		{xen:raw $editLink}
+	</xen:html>
+</xen:controlunit>]]></template>
+  </admin_templates>
+  <admin_template_modifications/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="file_health_check" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
+    <listener event_id="init_dependencies" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="load_class_XenForo_ControllerPublic_Attachment" active="1" hint="XenForo_ControllerPublic_Attachment" description="XenForo_ControllerPublic_Attachment"/>
+    <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="load_class_XenForo_DataWriter_AttachmentData" active="1" hint="XenForo_DataWriter_AttachmentData" description="XenForo_DataWriter_AttachmentData"/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups>
+    <group group_id="bdAttachmentPreview" display_order="9999" debug_only="0"/>
+    <option option_id="bdAttachmentPreview_pdf" edit_format="callback" data_type="array" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>bdAttachmentPreview_Option::renderPdf</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="bdAttachmentPreview" display_order="100"/>
+    </option>
+  </optiongroups>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="bdattachmentpreview_pdf_ghostscript" version_id="1" version_string="dev"><![CDATA[Render preview with ghostscript]]></phrase>
+    <phrase title="bdattachmentpreview_pdf_ghostscript_explain" version_id="1" version_string="dev"><![CDATA[Enable this option to render PDF preview using server binary located at {path}.]]></phrase>
+    <phrase title="bdattachmentpreview_pdf_ghostscript_instruction" version_id="1" version_string="dev"><![CDATA[Install ghostscript on your server to use this option.]]></phrase>
+    <phrase title="bdattachmentpreview_pdf_pages_max" version_id="1" version_string="dev"><![CDATA[Maximum Pages for Preview]]></phrase>
+    <phrase title="bdattachmentpreview_pdf_pdfinfo" version_id="1" version_string="dev"><![CDATA[Parse with pdfinfo]]></phrase>
+    <phrase title="bdattachmentpreview_pdf_pdfinfo_explain" version_id="1" version_string="dev"><![CDATA[Enable this option to parse PDF info using server binary located at {path}.]]></phrase>
+    <phrase title="bdattachmentpreview_pdf_pdfinfo_instruction" version_id="1" version_string="dev"><![CDATA[Install pdfinfo on your server to use this option.]]></phrase>
+    <phrase title="bdattachmentpreview_preview" version_id="1" version_string="dev"><![CDATA[Preview]]></phrase>
+    <phrase title="bdattachmentpreview_preview_is_available" version_id="1" version_string="dev"><![CDATA[Preview is available for this attachment.]]></phrase>
+    <phrase title="bdattachmentpreview_try_exec_x" version_id="1" version_string="dev"><![CDATA[Try executing `<span style="font-family: 'Courier New';">{cmd}</span>` to install it.]]></phrase>
+    <phrase title="bdattachmentpreview_view_full_attachment" version_id="1" version_string="dev"><![CDATA[Download]]></phrase>
+    <phrase title="option_bdAttachmentPreview_pdf" version_id="1" version_string="dev"><![CDATA[PDF Preview]]></phrase>
+    <phrase title="option_bdAttachmentPreview_pdf_explain" version_id="1" version_string="dev"><![CDATA[]]></phrase>
+    <phrase title="option_group_bdAttachmentPreview" version_id="1" version_string="dev"><![CDATA[[bd] Attachment Preview]]></phrase>
+    <phrase title="option_group_bdAttachmentPreview_description" version_id="1" version_string="dev"><![CDATA[]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates>
+    <template title="bdattachmentpreview.css" version_id="1" version_string="dev"><![CDATA[.attachment-previewer {
+	text-align: center;
+}
+
+.header {
+	padding: 10px 0;
+}
+.sticky-wrapper.is-sticky .header {
+	background: {xen:property contentBackground};
+}
+
+.attachment-previewer .header-text {
+	display: none;
+}
+.sticky-wrapper.is-sticky .header-text {
+	display: block;
+}
+
+.attachment-previewer .PageNav {
+	margin: 0 auto;
+}]]></template>
+    <template title="bdattachmentpreview_attached_files_filename" version_id="1" version_string="dev"><![CDATA[<a href="{xen:link attachments/preview, $attachment}" target="_blank"
+   title="{xen:phrase bdattachmentpreview_preview_is_available}" class="Tooltip">
+	{$attachment.filename}
+</a>
+
+<xen:edithint template="attached_files" />]]></template>
+    <template title="bdattachmentpreview_attached_files_thumbnail" version_id="1" version_string="dev"><![CDATA[<a href="{xen:link attachments/preview, $attachment}" target="_blank" class="previewableAttachment">
+	<img src="{$attachment.thumbnailUrl}" alt="{$attachment.filename}" />
+</a>
+
+<xen:edithint template="attached_files" />
+]]></template>
+    <template title="bdattachmentpreview_attachment_preview" version_id="1" version_string="dev"><![CDATA[<xen:require css="bdattachmentpreview.css" />
+<xen:require js="js/bdAttachmentPreview/lib/jdataview.js" />
+<xen:require js="js/bdAttachmentPreview/lib/jbinary.js" />
+<xen:require js="js/bdAttachmentPreview/jquery.sticky.js" />
+<xen:require js="js/bdAttachmentPreview/preview.js" />
+
+<xen:title>{xen:phrase bdattachmentpreview_preview}: {$attachment.filename}</xen:title>
+
+<xen:if is="{$attachment.content_link}">
+	<xen:navigation>
+		<xen:breadcrumb href="{$attachment.content_link}">{xen:phrase content}</xen:breadcrumb>
+	</xen:navigation>
+</xen:if>
+
+<xen:if is="{$canViewAttachment}">
+	<xen:topctrl>
+		<a href="{xen:link attachments, $attachment}" class="callToAction">
+			<span>{xen:phrase bdattachmentpreview_view_full_attachment}</span>
+		</a>
+	</xen:topctrl>
+</xen:if>
+
+<div class="section sectionMain">
+	<div class="attachment-previewer">
+		<div class="header">
+			<div class="header-text">
+				{xen:phrase bdattachmentpreview_preview}: {$attachment.filename}
+				<xen:if is="{$canViewAttachment}">
+					<a href="{xen:link attachments, $attachment}">
+						(<span>{xen:phrase bdattachmentpreview_view_full_attachment}</span>)
+					</a>
+				</xen:if>
+			</div>
+			<div class="PageNav" style="display: none;"></div>
+		</div>
+		<div class="current-page">
+			<img src="{xen:if '{$safeUrl}', $safeUrl, $attachment.thumbnailUrl}" class="data" />
+		</div>
+		<div class="PageNav" style="display: none;"></div>
+	</div>
+</div>]]></template>
+  </templates>
+  <public_template_modifications>
+    <modification template="attached_files" modification_key="bdattachmentpreview_attached_files_filename" description="Inject filename preview link." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#(<h6 class="filename">)(.+?)(</h6>)#]]></find>
+      <replace><![CDATA[$1
+<xen:if is="{$attachment.bdattachmentpreview_data}">
+	<xen:include template="bdattachmentpreview_attached_files_filename" />
+<xen:else />
+	$2
+</xen:if>
+$3]]></replace>
+    </modification>
+    <modification template="attached_files" modification_key="bdattachmentpreview_attached_files_thumbnail" description="Inject thumbnail preview link." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#(<div class="thumbnail">\s+)<xen:if([^>]+)>#]]></find>
+      <replace><![CDATA[$1<xen:if is="{$attachment.thumbnailUrl} && {$attachment.bdattachmentpreview_data}">
+	<xen:include template="bdattachmentpreview_attached_files_thumbnail" />
+<xen:elseif$2 />]]></replace>
+    </modification>
+  </public_template_modifications>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
