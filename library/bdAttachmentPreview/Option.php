@@ -6,6 +6,14 @@ class bdAttachmentPreview_Option
     {
         $options = XenForo_Application::getOptions();
 
+        switch ($key) {
+            case 'videoExt':
+                if ($subKey === 'preg_split') {
+                    return preg_split('/\s+/', trim($options->get('bdAttachmentPreview_videoExt')));
+                }
+                break;
+        }
+
         return $options->get('bdAttachmentPreview_' . $key, $subKey);
     }
 
@@ -48,6 +56,26 @@ class bdAttachmentPreview_Option
             'ghostscript' => $ghostscript,
             'pdfinfo' => $pdfinfo,
             'instructions' => $instructions,
+        ));
+    }
+
+    public static function renderVideoThumb(XenForo_View $view, $fieldPrefix, array $preparedOption, $canEdit)
+    {
+        $ffmpeg = exec('which ffmpeg');
+
+        $editLink = $view->createTemplateObject('option_list_option_editlink', array(
+            'preparedOption' => $preparedOption,
+            'canEditOptionDefinition' => $canEdit
+        ));
+
+        return $view->createTemplateObject('bdattachmentpreview_option_template_video_thumb', array(
+            'fieldPrefix' => $fieldPrefix,
+            'listedFieldName' => $fieldPrefix . '_listed[]',
+            'preparedOption' => $preparedOption,
+            'formatParams' => $preparedOption['formatParams'],
+            'editLink' => $editLink,
+
+            'ffmpeg' => $ffmpeg,
         ));
     }
 }

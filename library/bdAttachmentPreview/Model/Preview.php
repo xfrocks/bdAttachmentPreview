@@ -16,6 +16,11 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
             case 'pdf':
                 return $this->generatePdfPreview($dw);
             default:
+                $videoExt = bdAttachmentPreview_Option::get('videoExt', 'preg_split');
+                if (in_array($extension, $videoExt, true)) {
+                    return $this->generateVideoThumb($dw);
+                }
+
                 return false;
         }
     }
@@ -28,16 +33,7 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
         }
 
         // step 1: prepare a valid temp file
-        $tempFile = $dw->getExtraData(XenForo_DataWriter_AttachmentData::DATA_TEMP_FILE);
-        $shouldUnlinkTempFile = false;
-        if (!$tempFile) {
-            $data = $dw->getExtraData(XenForo_DataWriter_AttachmentData::DATA_FILE_DATA);
-            if ($data) {
-                $tempFile = tempnam(XenForo_Helper_File::getTempDir(), 'pdf_preview');
-                file_put_contents($tempFile, $data);
-                $shouldUnlinkTempFile = true;
-            }
-        }
+        list($tempFile, $shouldUnlinkTempFile) = $this->_common_prepareTempFile($dw);
         if (!$tempFile) {
             return false;
         }
@@ -55,18 +51,101 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
         }
 
         // step 4: keep track of new preview (if generated)
-        if (empty($previewTempFile)) {
+        if (!$this->_common_setDwThumbnail($dw, $previewTempFile, IMAGETYPE_PNG, false)) {
             return false;
         }
-        $previewImage = XenForo_Image_Abstract::createFromFile($previewTempFile, IMAGETYPE_PNG);
-        if (!$previewImage) {
+        $dw->set('bdattachmentpreview_data', array('options' => $options));
+
+        return true;
+    }
+
+    public function generateVideoThumb(XenForo_DataWriter_AttachmentData $dw)
+    {
+        $options = bdAttachmentPreview_Option::get('videoThumb');
+        if (empty($options['ffmpeg'])) {
             return false;
         }
 
+        // step 1: prepare a valid temp file
+        list($tempFile, $shouldUnlinkTempFile) = $this->_common_prepareTempFile($dw);
+        if (!$tempFile) {
+            return false;
+        }
+
+        // step 2: generate preview
+        $previewTempFile = '';
+        if (!empty($options['ffmpeg'])) {
+            $previewTempFile = $this->_generateVideoThumb_ffmpeg($options['ffmpeg'], $tempFile, $options);
+        }
+
+        // step 3: clean up temp file (if needed)
+        if ($shouldUnlinkTempFile) {
+            unlink($tempFile);
+        }
+
+        // step 4: keep track of new preview (if generated)
+        if (!$this->_common_setDwThumbnail($dw, $previewTempFile, IMAGETYPE_JPEG, true)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function _common_prepareTempFile(XenForo_DataWriter_AttachmentData $dw)
+    {
+        $tempFile = $dw->getExtraData(XenForo_DataWriter_AttachmentData::DATA_TEMP_FILE);
+        $shouldUnlinkTempFile = false;
+
+        if (!$tempFile) {
+            $data = $dw->getExtraData(XenForo_DataWriter_AttachmentData::DATA_FILE_DATA);
+            if ($data) {
+                $tempFile = tempnam(XenForo_Helper_File::getTempDir(), 'bdattachmentpreview_');
+                file_put_contents($tempFile, $data);
+                $shouldUnlinkTempFile = true;
+            }
+        }
+
+        if (!$tempFile) {
+            if (XenForo_Application::debugMode()) {
+                XenForo_Helper_File::log(__CLASS__, sprintf('prepareTempFile failed (filename=%s, file_hash=%s)',
+                    $dw->get('filename'), $dw->get('file_hash')));
+            }
+        }
+
+        return array($tempFile, $shouldUnlinkTempFile);
+    }
+
+    protected function _common_setDwThumbnail(
+        XenForo_DataWriter_AttachmentData $dw,
+        $previewTempFile,
+        $previewType,
+        $resize
+    ) {
+        if (empty($previewTempFile)) {
+            return false;
+        }
+
+        $previewImage = XenForo_Image_Abstract::createFromFile($previewTempFile, $previewType);
+        if (!$previewImage) {
+            if (XenForo_Application::debugMode()) {
+                XenForo_Helper_File::log(__CLASS__, sprintf('setThumbnailWidthHeight: failed to create image '
+                    . '($$previewTempFile=%s, $previewType=%d)',
+                    $previewTempFile, $previewType));
+            }
+
+            return false;
+        }
+
+        if ($resize) {
+            if ($previewImage->thumbnail(XenForo_Application::getOptions()->get('attachmentThumbnailDimensions')))
+            {
+                $previewImage->output($previewType, $previewTempFile);
+            }
+        }
+
         $dw->setExtraData(XenForo_DataWriter_AttachmentData::DATA_TEMP_THUMB_FILE, $previewTempFile);
-        $dw->set('thumbnail_height', $previewImage->getHeight());
         $dw->set('thumbnail_width', $previewImage->getWidth());
-        $dw->set('bdattachmentpreview_data', array('options' => $options));
+        $dw->set('thumbnail_height', $previewImage->getHeight());
 
         return true;
     }
@@ -145,5 +224,38 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
         }
 
         return $info;
+    }
+
+    protected function _generateVideoThumb_ffmpeg($binaryPath, $pdfPath, array $options)
+    {
+        $extraParams = array();
+        if (isset($options['ffmpeg_params'])) {
+            $extraParams[] = $options['ffmpeg_params'];
+        }
+
+        $thumbTempFile = tempnam(XenForo_Helper_File::getTempDir(), 'video_thumb_ffmpeg');
+        $ffmpegCmd = sprintf('%1$s -i %2$s -vframes 1 -y %4$s -f image2 -- %3$s',
+            $binaryPath,
+            escapeshellarg($pdfPath),
+            escapeshellarg($thumbTempFile),
+            implode(' ', $extraParams));
+        $ffmpegOutput = array();
+        $ffmpegStatus = 0;
+        exec($ffmpegCmd, $ffmpegOutput, $ffmpegStatus);
+
+        if ($ffmpegStatus === 0) {
+            if (XenForo_Application::debugMode()) {
+                XenForo_Helper_File::log(__METHOD__, sprintf("%s -> %d\n%s", $ffmpegCmd,
+                    $ffmpegStatus, implode("\n", $ffmpegOutput)));
+            }
+
+            return $thumbTempFile;
+        } else {
+            XenForo_Error::logError("%s -> %d\n%s", $ffmpegCmd,
+                $ffmpegStatus, implode("\n", $ffmpegOutput));
+
+            unlink($thumbTempFile);
+            return '';
+        }
     }
 }

@@ -56,6 +56,29 @@
 		{xen:raw $editLink}
 	</xen:html>
 </xen:controlunit>]]></template>
+    <template title="bdattachmentpreview_option_template_video_thumb"><![CDATA[<xen:controlunit label="{$preparedOption.title}" hint="{$preparedOption.hint}">
+	<xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
+	<xen:html>
+
+		<xen:checkbox>
+			<xen:option name="{$fieldPrefix}[{$preparedOption.option_id}][ffmpeg]"
+						value="{$ffmpeg}"
+						selected="{$ffmpeg} && {$preparedOption.option_value.ffmpeg} == {$ffmpeg}"
+						unselectable="{xen:if '{$ffmpeg}', 0, 1}">
+				<xen:label>
+					{xen:phrase bdattachmentpreview_video_thumbnail_ffmpeg}
+					<div class="explain">{xen:if '{$ffmpeg}',
+						{xen:phrase bdattachmentpreview_video_thumbnail_ffmpeg_explain,
+							'path={$ffmpeg}'},
+						'{xen:phrase bdattachmentpreview_video_thumbnail_ffmpeg_instruction}'}</div>
+				</xen:label>
+			</xen:option>
+		</xen:checkbox>
+
+		<input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
+		{xen:raw $editLink}
+	</xen:html>
+</xen:controlunit>]]></template>
   </admin_templates>
   <admin_template_modifications/>
   <code_events/>
@@ -76,6 +99,20 @@
       <sub_options>*</sub_options>
       <relation group_id="bdAttachmentPreview" display_order="100"/>
     </option>
+    <option option_id="bdAttachmentPreview_videoExt" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>avi
+mov
+mp4</default_value>
+      <edit_format_params>rows=6</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdAttachmentPreview" display_order="1000"/>
+    </option>
+    <option option_id="bdAttachmentPreview_videoThumb" edit_format="callback" data_type="array" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>bdAttachmentPreview_Option::renderVideoThumb</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="bdAttachmentPreview" display_order="1010"/>
+    </option>
   </optiongroups>
   <permissions>
     <permission_groups/>
@@ -93,9 +130,16 @@
     <phrase title="bdattachmentpreview_preview" version_id="1" version_string="dev"><![CDATA[Preview]]></phrase>
     <phrase title="bdattachmentpreview_preview_is_available" version_id="1" version_string="dev"><![CDATA[Preview is available for this attachment.]]></phrase>
     <phrase title="bdattachmentpreview_try_exec_x" version_id="1" version_string="dev"><![CDATA[Try executing `<span style="font-family: 'Courier New';">{cmd}</span>` to install it.]]></phrase>
+    <phrase title="bdattachmentpreview_video_thumbnail_ffmpeg" version_id="1" version_string="dev"><![CDATA[Render video thumbnail with FFmpeg]]></phrase>
+    <phrase title="bdattachmentpreview_video_thumbnail_ffmpeg_explain" version_id="1" version_string="dev"><![CDATA[Enable this option to render video thumbnail using server binary located at {path}.]]></phrase>
+    <phrase title="bdattachmentpreview_video_thumbnail_ffmpeg_instruction" version_id="1" version_string="dev"><![CDATA[Install FFmpeg on your server to use this option.]]></phrase>
     <phrase title="bdattachmentpreview_view_full_attachment" version_id="1" version_string="dev"><![CDATA[Download]]></phrase>
     <phrase title="option_bdAttachmentPreview_pdf" version_id="1" version_string="dev"><![CDATA[PDF Preview]]></phrase>
     <phrase title="option_bdAttachmentPreview_pdf_explain" version_id="1" version_string="dev"><![CDATA[]]></phrase>
+    <phrase title="option_bdAttachmentPreview_videoExt" version_id="1" version_string="dev"><![CDATA[Video Extensions]]></phrase>
+    <phrase title="option_bdAttachmentPreview_videoExt_explain" version_id="1" version_string="dev"><![CDATA[List the file extensions that are queued for video preview processing. Use spaces or line break between extensions. You will need to add these extensions into <a href="admin.php?options/list/attachments" target="_blank" tabindex="-1">Allowed Attachment File Extensions</a> option too, otherwise XenForo won't allow user to upload the videos.]]></phrase>
+    <phrase title="option_bdAttachmentPreview_videoThumb" version_id="1" version_string="dev"><![CDATA[Video Thumbnail]]></phrase>
+    <phrase title="option_bdAttachmentPreview_videoThumb_explain" version_id="1" version_string="dev"><![CDATA[]]></phrase>
     <phrase title="option_group_bdAttachmentPreview" version_id="1" version_string="dev"><![CDATA[[bd] Attachment Preview]]></phrase>
     <phrase title="option_group_bdAttachmentPreview_description" version_id="1" version_string="dev"><![CDATA[]]></phrase>
   </phrases>
