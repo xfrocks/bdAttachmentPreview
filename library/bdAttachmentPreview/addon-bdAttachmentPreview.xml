@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="1.0.0" version_id="1000000" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="1.1.0" version_id="1010000" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -51,7 +51,24 @@
 				</xen:disabled>
 			</xen:option>
 		</xen:checkbox>
-		
+
+		<xen:checkbox>
+			<xen:option name="{$fieldPrefix}[{$preparedOption.option_id}][unoconv]"
+						value="{$unoconv}"
+						selected="{$unoconv} && {$preparedOption.option_value.unoconv} == {$unoconv}"
+						unselectable="{xen:if '{$unoconv}', 0, 1}">
+				<xen:label>
+					{xen:phrase bdattachmentpreview_pdf_unoconv}
+					<div class="explain">{xen:if '{$unoconv}',
+						{xen:phrase bdattachmentpreview_pdf_unoconv_explain,
+							'path={$unoconv}'},
+						'{xen:phrase bdattachmentpreview_pdf_unoconv_instruction}
+						{xen:if '{$instructions.unoconv}', {xen:phrase bdattachmentpreview_try_exec_x,
+							'cmd={$instructions.unoconv}'}}'}</div>
+				</xen:label>
+			</xen:option>
+		</xen:checkbox>
+
 		<input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
 		{xen:raw $editLink}
 	</xen:html>
@@ -127,6 +144,9 @@ mp4</default_value>
     <phrase title="bdattachmentpreview_pdf_pdfinfo" version_id="1" version_string="dev"><![CDATA[Parse with pdfinfo]]></phrase>
     <phrase title="bdattachmentpreview_pdf_pdfinfo_explain" version_id="1" version_string="dev"><![CDATA[Enable this option to parse PDF info using server binary located at {path}.]]></phrase>
     <phrase title="bdattachmentpreview_pdf_pdfinfo_instruction" version_id="1" version_string="dev"><![CDATA[Install pdfinfo on your server to use this option.]]></phrase>
+    <phrase title="bdattachmentpreview_pdf_unoconv" version_id="1000000" version_string="1.0.0"><![CDATA[Process Microsoft Office files with unoconv]]></phrase>
+    <phrase title="bdattachmentpreview_pdf_unoconv_explain" version_id="1000000" version_string="1.0.0"><![CDATA[Enable this option to render preview for Microsoft Office documents (doc, docx) using server binary located at {path}.]]></phrase>
+    <phrase title="bdattachmentpreview_pdf_unoconv_instruction" version_id="1000000" version_string="1.0.0"><![CDATA[Install unoconv on your server to use this option.]]></phrase>
     <phrase title="bdattachmentpreview_preview" version_id="1" version_string="dev"><![CDATA[Preview]]></phrase>
     <phrase title="bdattachmentpreview_preview_is_available" version_id="1" version_string="dev"><![CDATA[Preview is available for this attachment.]]></phrase>
     <phrase title="bdattachmentpreview_try_exec_x" version_id="1" version_string="dev"><![CDATA[Try executing `<span style="font-family: 'Courier New';">{cmd}</span>` to install it.]]></phrase>

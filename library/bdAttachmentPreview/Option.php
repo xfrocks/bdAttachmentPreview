@@ -41,6 +41,15 @@ class bdAttachmentPreview_Option
             }
         }
 
+        $unoconv = exec('which unoconv');
+        if (empty($unoconv)) {
+            if ($aptGet) {
+                $instructions['unoconv'] = 'sudo apt-get install unoconv';
+            } elseif ($yum) {
+                $instructions['unoconv'] = 'sudo yum install unoconv';
+            }
+        }
+
         $editLink = $view->createTemplateObject('option_list_option_editlink', array(
             'preparedOption' => $preparedOption,
             'canEditOptionDefinition' => $canEdit
@@ -55,6 +64,7 @@ class bdAttachmentPreview_Option
 
             'ghostscript' => $ghostscript,
             'pdfinfo' => $pdfinfo,
+            'unoconv' => $unoconv,
             'instructions' => $instructions,
         ));
     }

@@ -13,19 +13,32 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
     public function generatePreview($extension, XenForo_DataWriter_AttachmentData $dw)
     {
         switch ($extension) {
+            case 'doc':
+            case 'docx':
+                return $this->generateMicrosoftOfficePreview($extension, $dw);
             case 'pdf':
-                return $this->generatePdfPreview($dw);
+                return $this->generatePdfPreview($extension, $dw);
             default:
                 $videoExt = bdAttachmentPreview_Option::get('videoExt', 'preg_split');
                 if (in_array($extension, $videoExt, true)) {
-                    return $this->generateVideoThumb($dw);
+                    return $this->generateVideoThumb($extension, $dw);
                 }
 
                 return false;
         }
     }
 
-    public function generatePdfPreview(XenForo_DataWriter_AttachmentData $dw)
+    public function generateMicrosoftOfficePreview($extension, XenForo_DataWriter_AttachmentData $dw)
+    {
+        $options = bdAttachmentPreview_Option::get('pdf');
+        if (empty($options['unoconv'])) {
+            return false;
+        }
+
+        return $this->generatePdfPreview($extension, $dw);
+    }
+
+    public function generatePdfPreview($extension, XenForo_DataWriter_AttachmentData $dw)
     {
         $options = bdAttachmentPreview_Option::get('pdf');
         if (empty($options['ghostscript'])) {
@@ -38,11 +51,24 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
             return false;
         }
 
+        // step 1b: convert tempt file to pdf if it's currently not
+        if ($extension !== 'pdf') {
+            if (!empty($options['unoconv'])) {
+                if ($this->_generatePdfPreview_unoconv($options['unoconv'],
+                    $tempFile, $shouldUnlinkTempFile, $options)
+                ) {
+                    $extension = 'pdf';
+                }
+            }
+        }
+
         // step 2: generate preview
-        $options = $this->_generatePdfPreview_prepareOptions($tempFile, $options);
         $previewTempFile = '';
-        if (!empty($options['ghostscript'])) {
-            $previewTempFile = $this->_generatePdfPreview_ghostscript($options['ghostscript'], $tempFile, $options);
+        if ($extension === 'pdf') {
+            $options = $this->_generatePdfPreview_prepareOptions($tempFile, $options);
+            if (!empty($options['ghostscript'])) {
+                $previewTempFile = $this->_generatePdfPreview_ghostscript($options['ghostscript'], $tempFile, $options);
+            }
         }
 
         // step 3: clean up temp file (if needed)
@@ -59,8 +85,11 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
         return true;
     }
 
-    public function generateVideoThumb(XenForo_DataWriter_AttachmentData $dw)
-    {
+    public function generateVideoThumb(
+        /** @noinspection PhpUnusedParameterInspection */
+        $extension,
+        XenForo_DataWriter_AttachmentData $dw
+    ) {
         $options = bdAttachmentPreview_Option::get('videoThumb');
         if (empty($options['ffmpeg'])) {
             return false;
@@ -137,8 +166,7 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
         }
 
         if ($resize) {
-            if ($previewImage->thumbnail(XenForo_Application::getOptions()->get('attachmentThumbnailDimensions')))
-            {
+            if ($previewImage->thumbnail(XenForo_Application::getOptions()->get('attachmentThumbnailDimensions'))) {
                 $previewImage->output($previewType, $previewTempFile);
             }
         }
@@ -148,6 +176,54 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
         $dw->set('thumbnail_height', $previewImage->getHeight());
 
         return true;
+    }
+
+    protected function _generatePdfPreview_unoconv($binaryPath, &$tempFile, &$shouldUnlinkTempFile, array $options)
+    {
+        $extraParams = array();
+        if (isset($options['pages_max'])
+            && $options['pages_max'] > 0
+        ) {
+            $extraParams[] = sprintf('-e PageRange=1-%d', $options['pages_max']);
+        }
+        if (XenForo_Application::debugMode()) {
+            $extraParams[] = '-vvvv';
+        }
+
+        $pdfFile = tempnam(XenForo_Helper_File::getTempDir(), 'pdf_preview_unoconv');
+        $unoconvCmd = sprintf('%1$s -f pdf %4$s -o %3$s %2$s',
+            $binaryPath,
+            escapeshellarg($tempFile),
+            escapeshellarg($pdfFile),
+            implode(' ', $extraParams),
+            escapeshellarg(dirname($pdfFile)));
+        $unoconvOutput = array();
+        $unoconvStatus = 0;
+        exec($unoconvCmd, $unoconvOutput, $unoconvStatus);
+
+        if ($unoconvStatus === 0) {
+            if (XenForo_Application::debugMode()) {
+                XenForo_Helper_File::log(__METHOD__, sprintf("%s -> %d\n%s", $unoconvCmd,
+                    $unoconvStatus, implode("\n", $unoconvOutput)));
+            }
+
+            if ($shouldUnlinkTempFile) {
+                unlink($tempFile);
+            }
+
+            $tempFile = $pdfFile;
+            $shouldUnlinkTempFile = true;
+
+            return true;
+        } else {
+            XenForo_Error::logError("%s -> %d\n%s%s", $unoconvCmd,
+                $unoconvStatus, implode("\n", $unoconvOutput),
+                $unoconvStatus === 251 ? "\nPlease consider running unoconv daemon as instructed here: "
+                    . 'http://bit.ly/1RMk1Gz' : '');
+
+            unlink($pdfFile);
+            return false;
+        }
     }
 
     protected function _generatePdfPreview_prepareOptions($pdfPath, array $options)
