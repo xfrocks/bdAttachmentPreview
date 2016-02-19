@@ -227,6 +227,7 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
         $pdfInfo = array();
         if (!empty($options['pdfinfo'])) {
             $pdfInfo = $this->_generatePdfPreview_pdfinfo($options['pdfinfo'], $pdfPath);
+            $options['_prepared_pdfinfo'] = $pdfInfo;
         }
 
         if (isset($options['pages_max'])
