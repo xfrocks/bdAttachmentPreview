@@ -24,9 +24,10 @@ class bdAttachmentPreview_Helper_System
             $cwd = getcwd();
         }
 
-        $env = array_merge(array(
-            'PATH' => getenv('PATH'),
-        ), $options['env']);
+        $env = $options['env'];
+        if (!isset($env['PATH'])) {
+            $env['PATH'] = self::_getEnvPath();
+        }
 
         $process = proc_open($cmd, $descriptorSpec, $pipes, $cwd, $env);
 
@@ -73,5 +74,21 @@ class bdAttachmentPreview_Helper_System
         } else {
             return '';
         }
+    }
+
+    protected static function _getEnvPath()
+    {
+        static $path = null;
+
+        if ($path === null) {
+            $path = getenv('PATH');
+
+            if (empty($path)) {
+                // workaround in case getenv does not work
+                $path = exec('echo $PATH');
+            }
+        }
+
+        return $path;
     }
 }
