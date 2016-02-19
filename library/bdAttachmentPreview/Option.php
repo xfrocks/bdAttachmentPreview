@@ -20,10 +20,10 @@ class bdAttachmentPreview_Option
     public static function renderPdf(XenForo_View $view, $fieldPrefix, array $preparedOption, $canEdit)
     {
         $instructions = array();
-        $aptGet = exec('which apt-get');
-        $yum = exec('which yum');
+        $aptGet = bdAttachmentPreview_Helper_System::execStdout('which apt-get');
+        $yum = bdAttachmentPreview_Helper_System::execStdout('which yum');
 
-        $ghostscript = exec('which ghostscript');
+        $ghostscript = bdAttachmentPreview_Helper_System::execStdout('which ghostscript');
         if (empty($ghostscript)) {
             if ($aptGet) {
                 $instructions['ghostscript'] = 'sudo apt-get install ghostscript';
@@ -32,7 +32,7 @@ class bdAttachmentPreview_Option
             }
         }
 
-        $pdfinfo = exec('which pdfinfo');
+        $pdfinfo = bdAttachmentPreview_Helper_System::execStdout('which pdfinfo');
         if (empty($pdfinfo)) {
             if ($aptGet) {
                 $instructions['pdfinfo'] = 'sudo apt-get install poppler-utils';
@@ -41,7 +41,7 @@ class bdAttachmentPreview_Option
             }
         }
 
-        $unoconv = exec('which unoconv');
+        $unoconv = bdAttachmentPreview_Helper_System::execStdout('which unoconv');
         if (empty($unoconv)) {
             if ($aptGet) {
                 $instructions['unoconv'] = 'sudo apt-get install unoconv';
@@ -71,7 +71,7 @@ class bdAttachmentPreview_Option
 
     public static function renderVideoThumb(XenForo_View $view, $fieldPrefix, array $preparedOption, $canEdit)
     {
-        $ffmpeg = exec('which ffmpeg');
+        $ffmpeg = bdAttachmentPreview_Helper_System::execStdout('which ffmpeg');
 
         $editLink = $view->createTemplateObject('option_list_option_editlink', array(
             'preparedOption' => $preparedOption,

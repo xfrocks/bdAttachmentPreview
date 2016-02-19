@@ -197,16 +197,13 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
             escapeshellarg($pdfFile),
             implode(' ', $extraParams),
             escapeshellarg(dirname($pdfFile)));
-        $unoconvOutput = array();
-        $unoconvStatus = 0;
-        exec($unoconvCmd, $unoconvOutput, $unoconvStatus);
+        $unoconvStatus = bdAttachmentPreview_Helper_System::execStatus($unoconvCmd, array(
+            'env' => array(
+                'HOME' => XenForo_Helper_File::getTempDir(),
+            ),
+        ));
 
         if ($unoconvStatus === 0) {
-            if (XenForo_Application::debugMode()) {
-                XenForo_Helper_File::log(__METHOD__, sprintf("%s -> %d\n%s", $unoconvCmd,
-                    $unoconvStatus, implode("\n", $unoconvOutput)));
-            }
-
             if ($shouldUnlinkTempFile) {
                 unlink($tempFile);
             }
@@ -216,10 +213,9 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
 
             return true;
         } else {
-            XenForo_Error::logError("%s -> %d\n%s%s", $unoconvCmd,
-                $unoconvStatus, implode("\n", $unoconvOutput),
-                $unoconvStatus === 251 ? "\nPlease consider running unoconv daemon as instructed here: "
-                    . 'http://bit.ly/1RMk1Gz' : '');
+            XenForo_Error::logError('%s -> %d%s', $unoconvCmd, $unoconvStatus,
+                $unoconvStatus === 251 ? ' (Please consider running unoconv daemon as instructed here: '
+                    . 'http://bit.ly/1RMk1Gz)' : '');
 
             unlink($pdfFile);
             return false;
@@ -262,20 +258,12 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
             escapeshellarg($pdfPath),
             escapeshellarg($previewTempFile),
             implode(' ', $extraParams));
-        $ghostscriptOutput = array();
-        $ghostscriptStatus = 0;
-        exec($ghostscriptCmd, $ghostscriptOutput, $ghostscriptStatus);
+        $ghostscriptStatus = bdAttachmentPreview_Helper_System::execStatus($ghostscriptCmd);
 
         if ($ghostscriptStatus === 0) {
-            if (XenForo_Application::debugMode()) {
-                XenForo_Helper_File::log(__METHOD__, sprintf("%s -> %d\n%s", $ghostscriptCmd,
-                    $ghostscriptStatus, implode("\n", $ghostscriptOutput)));
-            }
-
             return $previewTempFile;
         } else {
-            XenForo_Error::logError("%s -> %d\n%s", $ghostscriptCmd,
-                $ghostscriptStatus, implode("\n", $ghostscriptOutput));
+            XenForo_Error::logError('%s -> %d', $ghostscriptCmd, $ghostscriptStatus);
 
             unlink($previewTempFile);
             return '';
@@ -287,12 +275,10 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
         $info = array();
 
         $pdfinfoCmd = sprintf('%1$s %2$s', $binaryPath, escapeshellarg($pdfPath));
-        $pdfinfoOutput = array();
-        $pdfinfoStatus = 0;
-        exec($pdfinfoCmd, $pdfinfoOutput, $pdfinfoStatus);
+        $pdfinfo = bdAttachmentPreview_Helper_System::exec($pdfinfoCmd);
 
-        if ($pdfinfoStatus === 0) {
-            foreach ($pdfinfoOutput as $line) {
+        if ($pdfinfo['status'] === 0) {
+            foreach ($pdfinfo['stdout'] as $line) {
                 if (preg_match('#^(?<key>[^:]+):\s+(?<value>.+?)$#', $line, $matches)) {
                     $info[strtolower($matches['key'])] = $matches['value'];
                 }
@@ -315,20 +301,12 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
             escapeshellarg($pdfPath),
             escapeshellarg($thumbTempFile),
             implode(' ', $extraParams));
-        $ffmpegOutput = array();
-        $ffmpegStatus = 0;
-        exec($ffmpegCmd, $ffmpegOutput, $ffmpegStatus);
+        $ffmpegStatus = bdAttachmentPreview_Helper_System::execStatus($ffmpegCmd);
 
         if ($ffmpegStatus === 0) {
-            if (XenForo_Application::debugMode()) {
-                XenForo_Helper_File::log(__METHOD__, sprintf("%s -> %d\n%s", $ffmpegCmd,
-                    $ffmpegStatus, implode("\n", $ffmpegOutput)));
-            }
-
             return $thumbTempFile;
         } else {
-            XenForo_Error::logError("%s -> %d\n%s", $ffmpegCmd,
-                $ffmpegStatus, implode("\n", $ffmpegOutput));
+            XenForo_Error::logError('%s -> %d', $ffmpegCmd, $ffmpegStatus);
 
             unlink($thumbTempFile);
             return '';
