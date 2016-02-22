@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="1.1.1" version_id="1010101" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="1.2.0" version_id="1020000" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -96,8 +96,24 @@
 		{xen:raw $editLink}
 	</xen:html>
 </xen:controlunit>]]></template>
+    <template title="bdattachmentpreview_tools_rebuild"><![CDATA[<xen:form action="{xen:adminlink tools/trigger-deferred}">
+	<h2 class="subHeading">{xen:phrase bdattachmentpreview_rebuild_previews}</h2>
+	<xen:spinboxunit name="options[batch]" value="50" step="50" min="1" label="{xen:phrase items_to_process_per_page}:" />
+
+	<xen:submitunit save="{xen:phrase rebuild_now}" />
+	<input type="hidden" name="cache" value="bdAttachmentPreview_Deferred_Preview" />
+</xen:form>
+
+<xen:edithint template="tools_rebuild" />]]></template>
   </admin_templates>
-  <admin_template_modifications/>
+  <admin_template_modifications>
+    <modification template="tools_rebuild" modification_key="bdattachmentpreview_tools_rebuild" description="Insert preview rebuild form." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#\A.+\z#s]]></find>
+      <replace><![CDATA[$0
+
+<xen:include template="bdattachmentpreview_tools_rebuild" />]]></replace>
+    </modification>
+  </admin_template_modifications>
   <code_events/>
   <code_event_listeners>
     <listener event_id="file_health_check" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
@@ -148,7 +164,9 @@ mp4</default_value>
     <phrase title="bdattachmentpreview_pdf_unoconv_explain" version_id="1000000" version_string="1.0.0"><![CDATA[Enable this option to render preview for Microsoft Office documents (doc, docx) using server binary located at {path}.]]></phrase>
     <phrase title="bdattachmentpreview_pdf_unoconv_instruction" version_id="1000000" version_string="1.0.0"><![CDATA[Install unoconv on your server to use this option.]]></phrase>
     <phrase title="bdattachmentpreview_preview" version_id="1" version_string="dev"><![CDATA[Preview]]></phrase>
+    <phrase title="bdattachmentpreview_previews" version_id="1010101" version_string="1.1.1"><![CDATA[Attachment Previews]]></phrase>
     <phrase title="bdattachmentpreview_preview_is_available" version_id="1" version_string="dev"><![CDATA[Preview is available for this attachment.]]></phrase>
+    <phrase title="bdattachmentpreview_rebuild_previews" version_id="1010101" version_string="1.1.1"><![CDATA[Generate missing previews]]></phrase>
     <phrase title="bdattachmentpreview_try_exec_x" version_id="1" version_string="dev"><![CDATA[Try executing `<span style="font-family: 'Courier New';">{cmd}</span>` to install it.]]></phrase>
     <phrase title="bdattachmentpreview_video_thumbnail_ffmpeg" version_id="1" version_string="dev"><![CDATA[Render video thumbnail with FFmpeg]]></phrase>
     <phrase title="bdattachmentpreview_video_thumbnail_ffmpeg_explain" version_id="1" version_string="dev"><![CDATA[Enable this option to render video thumbnail using server binary located at {path}.]]></phrase>

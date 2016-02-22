@@ -134,6 +134,29 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
             }
         }
 
+        if (!$tempFile
+            && !$dw->isInsert()
+        ) {
+            /** @var XenForo_Model_Attachment $attachmentModel */
+            $attachmentModel = $this->getModelFromCache('XenForo_Model_Attachment');
+
+            $useTempFileCallable = array($attachmentModel, 'bdAttachmentStore_useTempFile');
+            if (is_callable($useTempFileCallable)) {
+                call_user_func($useTempFileCallable, true);
+            } else {
+                $useTempFileCallable = null;
+            }
+
+            $dataFilePath = $attachmentModel->getAttachmentDataFilePath($dw->getMergedData());
+            if (file_exists($dataFilePath)) {
+                $tempFile = $dataFilePath;
+            }
+
+            if ($useTempFileCallable !== null) {
+                call_user_func($useTempFileCallable, false);
+            }
+        }
+
         if (!$tempFile) {
             if (XenForo_Application::debugMode()) {
                 XenForo_Helper_File::log(__CLASS__, sprintf('prepareTempFile failed (filename=%s, file_hash=%s)',
