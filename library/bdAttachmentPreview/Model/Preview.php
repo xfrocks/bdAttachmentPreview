@@ -268,6 +268,13 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
     protected function _generatePdfPreview_ghostscript($binaryPath, $pdfPath, array $options)
     {
         $extraParams = array();
+
+        if (isset($options['resolution'])
+            && $options['resolution'] > 72
+        ) {
+            $extraParams[] = sprintf('-r%d', $options['resolution']);
+        }
+
         if (isset($options['_prepared_pages_offset'])
             && isset($options['_prepared_pages_limit'])
         ) {

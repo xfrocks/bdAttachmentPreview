@@ -22,6 +22,15 @@
 						{xen:if '{$instructions.ghostscript}', {xen:phrase bdattachmentpreview_try_exec_x,
 							'cmd={$instructions.ghostscript}'}}'}</div>
 				</xen:label>
+
+				<xen:disabled>
+					<div>
+						{xen:phrase bdattachmentpreview_pdf_resolution}:
+						<xen:spinbox name="{$fieldPrefix}[{$preparedOption.option_id}][resolution]"
+									 value="{xen:if 'isset({$preparedOption.option_value.resolution})',
+											{$preparedOption.option_value.resolution}, 72}"/>
+					</div>
+				</xen:disabled>
 			</xen:option>
 		</xen:checkbox>
 
@@ -160,6 +169,7 @@ mp4</default_value>
     <phrase title="bdattachmentpreview_pdf_pdfinfo" version_id="1" version_string="dev"><![CDATA[Parse with pdfinfo]]></phrase>
     <phrase title="bdattachmentpreview_pdf_pdfinfo_explain" version_id="1" version_string="dev"><![CDATA[Enable this option to parse PDF info using server binary located at {path}.]]></phrase>
     <phrase title="bdattachmentpreview_pdf_pdfinfo_instruction" version_id="1" version_string="dev"><![CDATA[Install pdfinfo on your server to use this option.]]></phrase>
+    <phrase title="bdattachmentpreview_pdf_resolution" version_id="1020000" version_string="1.2.0"><![CDATA[Resolution]]></phrase>
     <phrase title="bdattachmentpreview_pdf_unoconv" version_id="1000000" version_string="1.0.0"><![CDATA[Process Microsoft Office files with unoconv]]></phrase>
     <phrase title="bdattachmentpreview_pdf_unoconv_explain" version_id="1000000" version_string="1.0.0"><![CDATA[Enable this option to render preview for Microsoft Office documents (doc, docx) using server binary located at {path}.]]></phrase>
     <phrase title="bdattachmentpreview_pdf_unoconv_instruction" version_id="1000000" version_string="1.0.0"><![CDATA[Install unoconv on your server to use this option.]]></phrase>
@@ -184,7 +194,7 @@ mp4</default_value>
   <route_prefixes/>
   <style_properties/>
   <templates>
-    <template title="bdattachmentpreview.css" version_id="1" version_string="dev"><![CDATA[.attachment-previewer {
+    <template title="bdattachmentpreview.css" version_id="1020000" version_string="1.2.0"><![CDATA[.attachment-previewer {
 	text-align: center;
 }
 
@@ -204,6 +214,10 @@ mp4</default_value>
 
 .attachment-previewer .PageNav {
 	margin: 0 auto;
+}
+
+img.data { 
+	max-width: 100%;
 }]]></template>
     <template title="bdattachmentpreview_attached_files_filename" version_id="1" version_string="dev"><![CDATA[<a href="{xen:link attachments/preview, $attachment}" target="_blank"
    title="{xen:phrase bdattachmentpreview_preview_is_available}" class="Tooltip">
