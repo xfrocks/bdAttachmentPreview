@@ -48,7 +48,11 @@
                 this.$pageNav
                     .css('width', this.$data.width() + 'px')
                     .show();
-                this.$header.sticky();
+
+                if (!this.$container.is('.embedded')) {
+                    // only sticky in full preview
+                    this.$header.sticky();
+                }
             }
         },
 

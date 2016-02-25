@@ -135,6 +135,12 @@
   <email_template_modifications/>
   <optiongroups>
     <group group_id="bdAttachmentPreview" display_order="9999" debug_only="0"/>
+    <option option_id="bdAttachmentPreview_autoEmbed" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdAttachmentPreview" display_order="10"/>
+    </option>
     <option option_id="bdAttachmentPreview_pdf" edit_format="callback" data_type="array" can_backup="1">
       <default_value></default_value>
       <edit_format_params>bdAttachmentPreview_Option::renderPdf</edit_format_params>
@@ -182,6 +188,8 @@ mp4</default_value>
     <phrase title="bdattachmentpreview_video_thumbnail_ffmpeg_explain" version_id="1" version_string="dev"><![CDATA[Enable this option to render video thumbnail using server binary located at {path}.]]></phrase>
     <phrase title="bdattachmentpreview_video_thumbnail_ffmpeg_instruction" version_id="1" version_string="dev"><![CDATA[Install FFmpeg on your server to use this option.]]></phrase>
     <phrase title="bdattachmentpreview_view_full_attachment" version_id="1" version_string="dev"><![CDATA[Download]]></phrase>
+    <phrase title="option_bdAttachmentPreview_autoEmbed" version_id="1020000" version_string="1.2.0"><![CDATA[Auto Embed Preview]]></phrase>
+    <phrase title="option_bdAttachmentPreview_autoEmbed_explain" version_id="1020000" version_string="1.2.0"><![CDATA[]]></phrase>
     <phrase title="option_bdAttachmentPreview_pdf" version_id="1" version_string="dev"><![CDATA[PDF Preview]]></phrase>
     <phrase title="option_bdAttachmentPreview_pdf_explain" version_id="1" version_string="dev"><![CDATA[]]></phrase>
     <phrase title="option_bdAttachmentPreview_videoExt" version_id="1" version_string="dev"><![CDATA[Video Extensions]]></phrase>
@@ -198,9 +206,11 @@ mp4</default_value>
 	text-align: center;
 }
 
-.header {
+.attachment-previewer .header {
 	padding: 10px 0;
 }
+	.attachment-previewer.embedded .header { padding: 0; }
+
 .sticky-wrapper.is-sticky .header {
 	background: {xen:property contentBackground};
 }
@@ -208,9 +218,8 @@ mp4</default_value>
 .attachment-previewer .header-text {
 	display: none;
 }
-.sticky-wrapper.is-sticky .header-text {
-	display: block;
-}
+	.attachment-previewer.embedded .header-text { display: block; }
+	.sticky-wrapper.is-sticky .header-text { display: block; }
 
 .attachment-previewer .PageNav {
 	margin: 0 auto;
@@ -231,13 +240,7 @@ img.data {
 
 <xen:edithint template="attached_files" />
 ]]></template>
-    <template title="bdattachmentpreview_attachment_preview" version_id="1" version_string="dev"><![CDATA[<xen:require css="bdattachmentpreview.css" />
-<xen:require js="js/bdAttachmentPreview/lib/jdataview.js" />
-<xen:require js="js/bdAttachmentPreview/lib/jbinary.js" />
-<xen:require js="js/bdAttachmentPreview/jquery.sticky.js" />
-<xen:require js="js/bdAttachmentPreview/preview.js" />
-
-<xen:title>{xen:phrase bdattachmentpreview_preview}: {$attachment.filename}</xen:title>
+    <template title="bdattachmentpreview_attachment_preview" version_id="1020000" version_string="1.2.0"><![CDATA[<xen:title>{xen:phrase bdattachmentpreview_preview}: {$attachment.filename}</xen:title>
 
 <xen:if is="{$attachment.content_link}">
 	<xen:navigation>
@@ -254,23 +257,51 @@ img.data {
 </xen:if>
 
 <div class="section sectionMain">
-	<div class="attachment-previewer">
-		<div class="header">
-			<div class="header-text">
-				{xen:phrase bdattachmentpreview_preview}: {$attachment.filename}
-				<xen:if is="{$canViewAttachment}">
-					<a href="{xen:link attachments, $attachment}">
-						(<span>{xen:phrase bdattachmentpreview_view_full_attachment}</span>)
-					</a>
-				</xen:if>
-			</div>
-			<div class="PageNav" style="display: none;"></div>
-		</div>
-		<div class="current-page">
-			<img src="{xen:if '{$safeUrl}', $safeUrl, $attachment.thumbnailUrl}" class="data" />
+	<xen:include template="bdattachmentpreview_previewer" />
+</div>]]></template>
+    <template title="bdattachmentpreview_embedded_previews" version_id="1020000" version_string="1.2.0"><![CDATA[<xen:require css="bdattachmentpreview.css" />
+
+<xen:if hascontent="true">
+<ul class="embeddedPreviews">
+	<xen:contentcheck>
+	<xen:foreach loop="$post.attachments" value="$attachment">
+		<xen:if is="{$xenOptions.bdAttachmentPreview_autoEmbed}
+					&& {$attachment.bdattachmentpreview_data}">
+		<li class="sectionMain">
+			<xen:include template="bdattachmentpreview_previewer">
+				<xen:set var="$isEmbedded">1</xen:set>
+				<xen:set var="$canViewAttachment">{xen:if '{$canViewAttachments}', 1}</xen:set>
+			</xen:include>
+		</li>
+		</xen:if>
+	</xen:foreach>
+	</xen:contentcheck>
+</ul>
+</xen:if>
+
+<xen:edithint template="attached_files" />]]></template>
+    <template title="bdattachmentpreview_previewer" version_id="1020000" version_string="1.2.0"><![CDATA[<xen:require css="bdattachmentpreview.css" />
+<xen:require js="js/bdAttachmentPreview/lib/jdataview.js" />
+<xen:require js="js/bdAttachmentPreview/lib/jbinary.js" />
+<xen:require js="js/bdAttachmentPreview/jquery.sticky.js" />
+<xen:require js="js/bdAttachmentPreview/preview.js" />
+
+<div class="attachment-previewer{xen:if '{$isEmbedded}', ' embedded'}">
+	<div class="header">
+		<div class="header-text">
+			{xen:phrase bdattachmentpreview_preview}: {$attachment.filename}
+			<xen:if is="{$canViewAttachment}">
+				<a href="{xen:link attachments, $attachment}">
+					(<span>{xen:phrase bdattachmentpreview_view_full_attachment}</span>)
+				</a>
+			</xen:if>
 		</div>
 		<div class="PageNav" style="display: none;"></div>
 	</div>
+	<div class="current-page">
+		<img src="{xen:if '{$safeUrl}', $safeUrl, $attachment.thumbnailUrl}" class="data" />
+	</div>
+	<div class="PageNav" style="display: none;"></div>
 </div>]]></template>
   </templates>
   <public_template_modifications>
@@ -289,6 +320,21 @@ $3]]></replace>
       <replace><![CDATA[$1<xen:if is="{$attachment.thumbnailUrl} && {$attachment.bdattachmentpreview_data}">
 	<xen:include template="bdattachmentpreview_attached_files_thumbnail" />
 <xen:elseif$2 />]]></replace>
+    </modification>
+    <modification template="attached_files" modification_key="bdattachmentpreview_embedded_previews" description="Render embedded previews if needed." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#(\A.+)(<xen:foreach loop="\$post.attachments" value="\$attachment">)(.+)(</xen:foreach>)(.+\z)#s]]></find>
+      <replace><![CDATA[<xen:include template="bdattachmentpreview_embedded_previews" />
+
+<xen:if hascontent="true">
+$1
+<xen:contentcheck>
+$2
+<xen:if is="!{$xenOptions.bdAttachmentPreview_autoEmbed}
+			|| !{$attachment.bdattachmentpreview_data}">$3</xen:if>
+$4
+</xen:contentcheck>
+$5
+</xen:if>]]></replace>
     </modification>
   </public_template_modifications>
   <bb_code_media_sites/>
