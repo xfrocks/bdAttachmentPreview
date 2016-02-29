@@ -13,16 +13,12 @@ class bdAttachmentPreview_XenForo_ControllerPublic_Attachment extends XFCP_bdAtt
             return $this->responseNoPermission();
         }
 
-        $safeUrl = bdAttachmentPreview_ShippableHelper_Http::resolveRedirect($attachment['thumbnailUrl']);
-
         $this->canonicalizeRequestUrl(
             XenForo_Link::buildPublicLink('attachments/preview', $attachment)
         );
 
         $viewParams = array(
             'attachment' => $attachment,
-            'safeUrl' => $safeUrl,
-
             'canViewAttachment' => $attachmentModel->canViewAttachment($attachment),
         );
 

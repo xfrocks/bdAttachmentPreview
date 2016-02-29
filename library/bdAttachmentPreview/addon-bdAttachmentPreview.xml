@@ -280,7 +280,7 @@ img.data {
 </xen:if>
 
 <xen:edithint template="attached_files" />]]></template>
-    <template title="bdattachmentpreview_previewer" version_id="1020000" version_string="1.2.0"><![CDATA[<xen:require css="bdattachmentpreview.css" />
+    <template title="bdattachmentpreview_previewer" version_id="1020100" version_string="1.2.1"><![CDATA[<xen:require css="bdattachmentpreview.css" />
 <xen:require js="js/bdAttachmentPreview/lib/jdataview.js" />
 <xen:require js="js/bdAttachmentPreview/lib/jbinary.js" />
 <xen:require js="js/bdAttachmentPreview/jquery.sticky.js" />
@@ -299,7 +299,12 @@ img.data {
 		<div class="PageNav" style="display: none;"></div>
 	</div>
 	<div class="current-page">
-		<img src="{xen:if '{$safeUrl}', $safeUrl, $attachment.thumbnailUrl}" class="data" />
+		<xen:set var="$safeUrl"><xen:callback
+			class="bdAttachmentPreview_Helper_Template"
+			method="getSafeUrl">
+				{xen:raw $attachment.thumbnailUrl}
+		</xen:callback></xen:set>
+		<img src="{$safeUrl}" class="data" />
 	</div>
 	<div class="PageNav" style="display: none;"></div>
 </div>]]></template>
