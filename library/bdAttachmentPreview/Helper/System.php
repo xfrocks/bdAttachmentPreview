@@ -73,7 +73,6 @@ class bdAttachmentPreview_Helper_System
                 }
 
                 $timeout -= (microtime(true) - $start) * 1000000;
-                XenForo_Helper_File::log(__METHOD__, sprintf('elapsed=%s', microtime(true) - $openTime));
             }
 
             $stdout = preg_split('#\n#', $buffer, -1, PREG_SPLIT_NO_EMPTY);
