@@ -224,6 +224,7 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
             'env' => array(
                 'HOME' => XenForo_Helper_File::getTempDir(),
             ),
+            'timeout' => bdAttachmentPreview_Option::get('execTimeout'),
         ));
 
         if ($unoconvStatus === 0) {
@@ -289,7 +290,9 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
             escapeshellarg($pdfPath),
             escapeshellarg($previewTempFile),
             implode(' ', $extraParams));
-        $ghostscriptStatus = bdAttachmentPreview_Helper_System::execStatus($ghostscriptCmd);
+        $ghostscriptStatus = bdAttachmentPreview_Helper_System::execStatus($ghostscriptCmd, array(
+            'timeout' => bdAttachmentPreview_Option::get('execTimeout'),
+        ));
 
         if ($ghostscriptStatus === 0) {
             return $previewTempFile;
@@ -306,7 +309,9 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
         $info = array();
 
         $pdfinfoCmd = sprintf('%1$s %2$s', $binaryPath, escapeshellarg($pdfPath));
-        $pdfinfo = bdAttachmentPreview_Helper_System::exec($pdfinfoCmd);
+        $pdfinfo = bdAttachmentPreview_Helper_System::exec($pdfinfoCmd, array(
+            'timeout' => bdAttachmentPreview_Option::get('execTimeout'),
+        ));
 
         if ($pdfinfo['status'] === 0) {
             foreach ($pdfinfo['stdout'] as $line) {
@@ -332,7 +337,9 @@ class bdAttachmentPreview_Model_Preview extends XenForo_Model
             escapeshellarg($pdfPath),
             escapeshellarg($thumbTempFile),
             implode(' ', $extraParams));
-        $ffmpegStatus = bdAttachmentPreview_Helper_System::execStatus($ffmpegCmd);
+        $ffmpegStatus = bdAttachmentPreview_Helper_System::execStatus($ffmpegCmd, array(
+            'timeout' => bdAttachmentPreview_Option::get('execTimeout'),
+        ));
 
         if ($ffmpegStatus === 0) {
             return $thumbTempFile;

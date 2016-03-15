@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="1.2.2" version_id="1020200" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="1.2.3" version_id="1020300" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -147,6 +147,13 @@
       <sub_options></sub_options>
       <relation group_id="bdAttachmentPreview" display_order="11"/>
     </option>
+    <option option_id="bdAttachmentPreview_execTimeout" edit_format="spinbox" data_type="unsigned_integer" can_backup="1">
+      <default_value>3000</default_value>
+      <edit_format_params>min=0
+step=30</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdAttachmentPreview" display_order="10000"/>
+    </option>
     <option option_id="bdAttachmentPreview_pdf" edit_format="callback" data_type="array" can_backup="1">
       <default_value></default_value>
       <edit_format_params>bdAttachmentPreview_Option::renderPdf</edit_format_params>
@@ -198,6 +205,8 @@ mp4</default_value>
     <phrase title="option_bdAttachmentPreview_autoEmbedHide" version_id="1020100" version_string="1.2.1"><![CDATA[Hide Auto-embedded Attachments]]></phrase>
     <phrase title="option_bdAttachmentPreview_autoEmbedHide_explain" version_id="1020100" version_string="1.2.1"><![CDATA[Enable this option to hide attachments that have been auto-embedded (see above).]]></phrase>
     <phrase title="option_bdAttachmentPreview_autoEmbed_explain" version_id="1020100" version_string="1.2.1"><![CDATA[Enable this option to show attachment preview controls automatically in posts.]]></phrase>
+    <phrase title="option_bdAttachmentPreview_execTimeout" version_id="1020200" version_string="1.2.2"><![CDATA[Script Timeout]]></phrase>
+    <phrase title="option_bdAttachmentPreview_execTimeout_explain" version_id="1020200" version_string="1.2.2"><![CDATA[Enter a positive value to limit script execution time to the specified number of seconds. 0 means no limitation.]]></phrase>
     <phrase title="option_bdAttachmentPreview_pdf" version_id="1" version_string="dev"><![CDATA[PDF Preview]]></phrase>
     <phrase title="option_bdAttachmentPreview_pdf_explain" version_id="1" version_string="dev"><![CDATA[]]></phrase>
     <phrase title="option_bdAttachmentPreview_videoExt" version_id="1" version_string="dev"><![CDATA[Video Extensions]]></phrase>
