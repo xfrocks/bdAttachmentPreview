@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="1.2.3" version_id="1020300" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="1.2.3" version_id="1020301" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -330,7 +330,8 @@ img.data {
     <modification template="attached_files" modification_key="bdattachmentpreview_attached_files_filename" description="Inject filename preview link." execution_order="10" enabled="1" action="preg_replace">
       <find><![CDATA[#(<h6 class="filename">)(.+?)(</h6>)#]]></find>
       <replace><![CDATA[$1
-<xen:if is="{$attachment.bdattachmentpreview_data}">
+<xen:if is="{$attachment.bdattachmentpreview_data}
+			&& !{$xenOptions.bdAttachmentPreview_autoEmbed}">
 	<xen:include template="bdattachmentpreview_attached_files_filename" />
 <xen:else />
 	$2
