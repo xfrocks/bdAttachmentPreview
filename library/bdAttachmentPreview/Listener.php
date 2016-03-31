@@ -27,4 +27,25 @@ class bdAttachmentPreview_Listener
     {
         $hashes += bdAttachmentPreview_FileSums::getHashes();
     }
+
+    public static function load_class_XenForo_DataWriter_Forum($class, array &$extend)
+    {
+        if ($class === 'XenForo_DataWriter_Forum') {
+            $extend[] = 'bdAttachmentPreview_XenForo_DataWriter_Forum';
+        }
+    }
+
+    public static function load_class_XenForo_ControllerAdmin_Forum($class, array &$extend)
+    {
+        if ($class === 'XenForo_ControllerAdmin_Forum') {
+            $extend[] = 'bdAttachmentPreview_XenForo_ControllerAdmin_Forum';
+        }
+    }
+
+    public static function load_class_X_DW_DM_Post($class, array &$extend)
+    {
+        if ($class === 'XenForo_DataWriter_DiscussionMessage_Post') {
+            $extend[] = 'bdAttachmentPreview_XenForo_DataWriter_DiscussionMessage_Post';
+        }
+    }
 }

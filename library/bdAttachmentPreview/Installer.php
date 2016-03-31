@@ -14,6 +14,14 @@ class bdAttachmentPreview_Installer
             'addQuery' => 'ALTER TABLE `xf_attachment_data` ADD COLUMN `bdattachmentpreview_data` MEDIUMBLOB',
             'dropQuery' => 'ALTER TABLE `xf_attachment_data` DROP COLUMN `bdattachmentpreview_data`',
         ),
+        array(
+            'table' => 'xf_forum',
+            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_forum\'',
+            'field' => 'bdattachmentpreview_options',
+            'checkQuery' => 'SHOW COLUMNS FROM `xf_forum` LIKE \'bdattachmentpreview_options\'',
+            'addQuery' => 'ALTER TABLE `xf_forum` ADD COLUMN `bdattachmentpreview_options` MEDIUMBLOB',
+            'dropQuery' => 'ALTER TABLE `xf_forum` DROP COLUMN `bdattachmentpreview_options`',
+        ),
     );
 
     public static function install($existingAddOn, $addOnData)

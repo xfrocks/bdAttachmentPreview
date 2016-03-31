@@ -7,6 +7,9 @@ class bdAttachmentPreview_DevHelper_Config extends DevHelper_Config_Base
         'xf_attachment_data' => array(
             'bdattachmentpreview_data' => array('name' => 'bdattachmentpreview_data', 'type' => 'serialized'),
         ),
+        'xf_forum' => array(
+            'bdattachmentpreview_options' => array('name' => 'bdattachmentpreview_options', 'type' => 'serialized'),
+        ),
     );
     protected $_exportPath = '/Users/sondh/XenForo/bdAttachmentPreview';
     protected $_exportIncludes = array();

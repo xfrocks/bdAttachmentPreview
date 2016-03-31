@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="1.2.3" version_id="1020302" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdAttachmentPreview" title="[bd] Attachment Preview" version_string="1.3.0" version_id="1030000" url="" install_callback_class="bdAttachmentPreview_Installer" install_callback_method="install" uninstall_callback_class="bdAttachmentPreview_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
   <admin_templates>
+    <template title="bdattachmentpreview_forum_edit_forum_options"><![CDATA[<xen:edithint template="forum_edit" />
+
+<xen:checkboxunit label="">
+	<xen:option name="bdattachmentpreview_options[requires_thumbnail]" label="{xen:phrase bdattachmentpreview_forum_requires_thumbnail}" selected="{$bdAttachmentPreview_options.requires_thumbnail}">
+		<xen:hint>{xen:phrase bdattachmentpreview_forum_requires_thumbnail_explain}</xen:hint>
+	</xen:option>
+</xen:checkboxunit>
+
+<input type="hidden" name="bdattachmentpreview_options_included" value="1" />]]></template>
     <template title="bdattachmentpreview_option_template_pdf"><![CDATA[<xen:controlunit label="{$preparedOption.title}" hint="{$preparedOption.hint}">
 	<xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
 	<xen:html>
@@ -116,6 +125,14 @@
 <xen:edithint template="tools_rebuild" />]]></template>
   </admin_templates>
   <admin_template_modifications>
+    <modification template="forum_edit" modification_key="bdattachmentpreview_forum_edit_forum_options" description="Insert forum option controls." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#(<xen:hook name="admin_forum_edit_forum_options".+?)(</xen:hook>)#s]]></find>
+      <replace><![CDATA[$1
+
+<xen:include template="bdattachmentpreview_forum_edit_forum_options" />
+
+$2]]></replace>
+    </modification>
     <modification template="tools_rebuild" modification_key="bdattachmentpreview_tools_rebuild" description="Insert preview rebuild form." execution_order="10" enabled="1" action="preg_replace">
       <find><![CDATA[#\A.+\z#s]]></find>
       <replace><![CDATA[$0
@@ -127,7 +144,10 @@
   <code_event_listeners>
     <listener event_id="file_health_check" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
     <listener event_id="init_dependencies" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="load_class_XenForo_ControllerAdmin_Forum" active="1" hint="XenForo_ControllerAdmin_Forum" description="XenForo_ControllerAdmin_Forum"/>
     <listener event_id="load_class_controller" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="load_class_XenForo_ControllerPublic_Attachment" active="1" hint="XenForo_ControllerPublic_Attachment" description="XenForo_ControllerPublic_Attachment"/>
+    <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="load_class_XenForo_DataWriter_Forum" active="1" hint="XenForo_DataWriter_Forum" description="XenForo_DataWriter_Forum"/>
+    <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="load_class_X_DW_DM_Post" active="1" hint="XenForo_DataWriter_DiscussionMessage_Post" description="XenForo_DataWriter_DiscussionMessage_Post"/>
     <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdAttachmentPreview_Listener" callback_method="load_class_XenForo_DataWriter_AttachmentData" active="1" hint="XenForo_DataWriter_AttachmentData" description="XenForo_DataWriter_AttachmentData"/>
   </code_event_listeners>
   <cron/>
@@ -181,6 +201,10 @@ mp4</default_value>
     <interface_groups/>
   </permissions>
   <phrases>
+    <phrase title="bdattachmentpreview_forum_requires_thumbnail" version_id="1020302" version_string="1.2.3"><![CDATA[Requires Attachment Thumbnail]]></phrase>
+    <phrase title="bdattachmentpreview_forum_requires_thumbnail_explain" version_id="1020302" version_string="1.2.3"><![CDATA[If enabled, new thread must have an attachment with thumbnail / preview to be posted.]]></phrase>
+    <phrase title="bdattachmentpreview_forum_x_requires_attachment" version_id="1020302" version_string="1.2.3"><![CDATA[You must upload at least one attachment to be able to post in forum {forum}.]]></phrase>
+    <phrase title="bdattachmentpreview_forum_x_requires_thumbnail" version_id="1020302" version_string="1.2.3"><![CDATA[None of your uploaded attachments have thumbnail / preview. They are required to be able to post in forum {forum}.]]></phrase>
     <phrase title="bdattachmentpreview_pdf_ghostscript" version_id="1" version_string="dev"><![CDATA[Render preview with ghostscript]]></phrase>
     <phrase title="bdattachmentpreview_pdf_ghostscript_explain" version_id="1" version_string="dev"><![CDATA[Enable this option to render PDF preview using server binary located at {path}.]]></phrase>
     <phrase title="bdattachmentpreview_pdf_ghostscript_instruction" version_id="1" version_string="dev"><![CDATA[Install ghostscript on your server to use this option.]]></phrase>
