@@ -4,11 +4,6 @@ XenForo_Model_Attachment::$dataColumns .= ', data.bdattachmentpreview_data';
 
 class bdAttachmentPreview_Listener
 {
-    public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
-    {
-
-    }
-
     public static function load_class_XenForo_DataWriter_AttachmentData($class, array &$extend)
     {
         if ($class === 'XenForo_DataWriter_AttachmentData') {
